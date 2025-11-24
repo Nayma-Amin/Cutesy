@@ -13,7 +13,7 @@ class _SplashScreenState extends State<SplashScreen>
   late AnimationController c1, c2, c3, c4, c5, logoAnim;
 
   late Animation<double> s1, s2, s3, s4, s5;
-  late Animation<double> o1, o2, o3, o4, o5; // opacity animations
+  late Animation<double> o1, o2, o3, o4, o5;
   late Animation<double> logoScale;
 
   @override
@@ -33,14 +33,12 @@ class _SplashScreenState extends State<SplashScreen>
       duration: const Duration(milliseconds: 1000),
     );
 
-    // Smooth bloom curve
     s1 = CurvedAnimation(parent: c1, curve: Curves.easeOutCubic);
     s2 = CurvedAnimation(parent: c2, curve: Curves.easeOutCubic);
     s3 = CurvedAnimation(parent: c3, curve: Curves.easeOutCubic);
     s4 = CurvedAnimation(parent: c4, curve: Curves.easeOutCubic);
     s5 = CurvedAnimation(parent: c5, curve: Curves.easeOutCubic);
 
-    // Opacity bloom (0 → 0.6 → 0)
     o1 = TweenSequence([
       TweenSequenceItem(tween: Tween(begin: 0.0, end: 0.6), weight: 60),
       TweenSequenceItem(tween: Tween(begin: 0.6, end: 0.0), weight: 40),
@@ -117,7 +115,6 @@ class _SplashScreenState extends State<SplashScreen>
       backgroundColor: const Color(0xFFFDE7EF),
       body: Stack(
         children: [
-          // Background
           Positioned(top: -80, left: -60, child: blurredPink()),
           Positioned(top: 120, right: -40, child: blurredPurple()),
           Positioned(bottom: -60, left: -40, child: blurredLilac()),
