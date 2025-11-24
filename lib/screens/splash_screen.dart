@@ -10,25 +10,17 @@ class SplashScreen extends StatefulWidget {
 
 class _SplashScreenState extends State<SplashScreen>
     with TickerProviderStateMixin {
-  late AnimationController c1;
-  late AnimationController c2;
-  late AnimationController c3;
-  late AnimationController c4;
-  late AnimationController c5;
-  late AnimationController logoAnim;
+  late AnimationController c1, c2, c3, c4, c5, logoAnim;
 
-  late Animation<double> s1;
-  late Animation<double> s2;
-  late Animation<double> s3;
-  late Animation<double> s4;
-  late Animation<double> s5;
+  late Animation<double> s1, s2, s3, s4, s5;
+  late Animation<double> o1, o2, o3, o4, o5; // opacity animations
   late Animation<double> logoScale;
 
   @override
   void initState() {
     super.initState();
 
-    const popDuration = Duration(milliseconds: 999);
+    const popDuration = Duration(milliseconds: 1200);
 
     c1 = AnimationController(vsync: this, duration: popDuration);
     c2 = AnimationController(vsync: this, duration: popDuration);
@@ -38,22 +30,70 @@ class _SplashScreenState extends State<SplashScreen>
 
     logoAnim = AnimationController(
       vsync: this,
-      duration: const Duration(milliseconds: 950),
+      duration: const Duration(milliseconds: 1000),
     );
 
-    s1 = CurvedAnimation(parent: c1, curve: Curves.easeOutBack);
-    s2 = CurvedAnimation(parent: c2, curve: Curves.easeOutBack);
-    s3 = CurvedAnimation(parent: c3, curve: Curves.easeOutBack);
-    s4 = CurvedAnimation(parent: c4, curve: Curves.easeOutBack);
-    s5 = CurvedAnimation(parent: c5, curve: Curves.easeOutBack);
-    logoScale = CurvedAnimation(parent: logoAnim, curve: Curves.easeOutBack);
+    // Smooth bloom curve
+    s1 = CurvedAnimation(parent: c1, curve: Curves.easeOutCubic);
+    s2 = CurvedAnimation(parent: c2, curve: Curves.easeOutCubic);
+    s3 = CurvedAnimation(parent: c3, curve: Curves.easeOutCubic);
+    s4 = CurvedAnimation(parent: c4, curve: Curves.easeOutCubic);
+    s5 = CurvedAnimation(parent: c5, curve: Curves.easeOutCubic);
 
+    // Opacity bloom (0 → 0.6 → 0)
+    o1 = TweenSequence([
+      TweenSequenceItem(tween: Tween(begin: 0.0, end: 0.6), weight: 60),
+      TweenSequenceItem(tween: Tween(begin: 0.6, end: 0.0), weight: 40),
+    ]).animate(c1);
+
+    o2 = TweenSequence([
+      TweenSequenceItem(tween: Tween(begin: 0.0, end: 0.6), weight: 60),
+      TweenSequenceItem(tween: Tween(begin: 0.6, end: 0.0), weight: 40),
+    ]).animate(c2);
+
+    o3 = TweenSequence([
+      TweenSequenceItem(tween: Tween(begin: 0.0, end: 0.6), weight: 60),
+      TweenSequenceItem(tween: Tween(begin: 0.6, end: 0.0), weight: 40),
+    ]).animate(c3);
+
+    o4 = TweenSequence([
+      TweenSequenceItem(tween: Tween(begin: 0.0, end: 0.6), weight: 60),
+      TweenSequenceItem(tween: Tween(begin: 0.6, end: 0.0), weight: 40),
+    ]).animate(c4);
+
+    o5 = TweenSequence([
+      TweenSequenceItem(tween: Tween(begin: 0.0, end: 0.6), weight: 60),
+      TweenSequenceItem(tween: Tween(begin: 0.6, end: 0.0), weight: 40),
+    ]).animate(c5);
+
+    logoScale = CurvedAnimation(parent: logoAnim, curve: Curves.easeOutBack);
+/*
     Future.delayed(const Duration(milliseconds: 200), () => c1.forward());
-    Future.delayed(const Duration(milliseconds: 500), () => c2.forward());
-    Future.delayed(const Duration(milliseconds: 800), () => c3.forward());
-    Future.delayed(const Duration(milliseconds: 1100), () => c4.forward());
-    Future.delayed(const Duration(milliseconds: 1400), () => c5.forward());
-    Future.delayed(const Duration(milliseconds: 1700), () => logoAnim.forward());
+    Future.delayed(const Duration(milliseconds: 600), () => c2.forward());
+    Future.delayed(const Duration(milliseconds: 1000), () => c3.forward());
+    Future.delayed(const Duration(milliseconds: 1400), () => c4.forward());
+    Future.delayed(const Duration(milliseconds: 1800), () => c5.forward());
+    Future.delayed(const Duration(milliseconds: 2300), () => logoAnim.forward());
+*/
+    Future.delayed(const Duration(milliseconds: 200), () {
+      c1.repeat();
+    });
+    Future.delayed(const Duration(milliseconds: 600), () {
+      c2.repeat();
+    });
+    Future.delayed(const Duration(milliseconds: 1000), () {
+      c3.repeat();
+    });
+    Future.delayed(const Duration(milliseconds: 1400), () {
+      c4.repeat();
+    });
+    Future.delayed(const Duration(milliseconds: 1800), () {
+      c5.repeat();
+    });
+
+    Future.delayed(const Duration(milliseconds: 2300), () {
+      logoAnim.forward();
+    });
 
     Timer(const Duration(seconds: 5), () {
       Navigator.pushReplacementNamed(context, '/home');
@@ -77,74 +117,24 @@ class _SplashScreenState extends State<SplashScreen>
       backgroundColor: const Color(0xFFFDE7EF),
       body: Stack(
         children: [
-          Positioned(
-            top: -80,
-            left: -60,
-            child: Container(
-              width: 220,
-              height: 220,
-              decoration: BoxDecoration(
-                shape: BoxShape.circle,
-                color: Colors.pinkAccent.withOpacity(0.35),
-              ),
-            ),
-          ),
-          Positioned(
-            top: 120,
-            right: -40,
-            child: Container(
-              width: 160,
-              height: 160,
-              decoration: BoxDecoration(
-                shape: BoxShape.circle,
-                color: Colors.purpleAccent.withOpacity(0.30),
-              ),
-            ),
-          ),
-          Positioned(
-            bottom: -60,
-            left: -40,
-            child: Container(
-              width: 260,
-              height: 260,
-              decoration: BoxDecoration(
-                shape: BoxShape.circle,
-                color: const Color.fromARGB(255, 219, 117, 250).withOpacity(0.28),
-              ),
-            ),
-          ),
+          // Background
+          Positioned(top: -80, left: -60, child: blurredPink()),
+          Positioned(top: 120, right: -40, child: blurredPurple()),
+          Positioned(bottom: -60, left: -40, child: blurredLilac()),
 
           Center(
             child: Stack(
               alignment: Alignment.center,
               children: [
-                ScaleTransition(
-                  scale: s1,
-                  child: circle(330, const Color(0xFFF8C7D9)),
-                ),
-                ScaleTransition(
-                  scale: s2,
-                  child: circle(270, const Color(0xFFF5A7C4)),
-                ),
-                ScaleTransition(
-                  scale: s3,
-                  child: circle(210, const Color(0xFFF08DB5)),
-                ),
-                ScaleTransition(
-                  scale: s4,
-                  child: circle(160, const Color(0xFFEA74AB)),
-                ),
-                ScaleTransition(
-                  scale: s5,
-                  child: circle(120, const Color(0xFFEC6FA6)),
-                ),
+                blendedCircle(330, const Color(0xFFF8C7D9), s1, o1),
+                blendedCircle(270, const Color(0xFFF5A7C4), s2, o2),
+                blendedCircle(210, const Color(0xFFF08DB5), s3, o3),
+                blendedCircle(160, const Color(0xFFEA74AB), s4, o4),
+                blendedCircle(120, const Color(0xFFEC6FA6), s5, o5),
 
                 ScaleTransition(
                   scale: logoScale,
-                  child: Image.asset(
-                    "assets/images/cutesy.png",
-                    width: 120,
-                  ),
+                  child: Image.asset("assets/images/cutesy.png", width: 120),
                 ),
               ],
             ),
@@ -154,11 +144,52 @@ class _SplashScreenState extends State<SplashScreen>
     );
   }
 
-  Widget circle(double size, Color color) {
-    return Container(
-      width: size,
-      height: size,
-      decoration: BoxDecoration(shape: BoxShape.circle, color: color),
+  Widget blendedCircle(
+    double size,
+    Color color,
+    Animation<double> scale,
+    Animation<double> opacity,
+  ) {
+    return ScaleTransition(
+      scale: scale,
+      child: FadeTransition(
+        opacity: opacity,
+        child: Container(
+          width: size,
+          height: size,
+          decoration: BoxDecoration(
+            shape: BoxShape.circle,
+            color: color.withOpacity(0.9),
+          ),
+        ),
+      ),
     );
   }
+
+  Widget blurredPink() => Container(
+    width: 220,
+    height: 220,
+    decoration: BoxDecoration(
+      shape: BoxShape.circle,
+      color: Colors.pinkAccent.withOpacity(0.30),
+    ),
+  );
+
+  Widget blurredPurple() => Container(
+    width: 160,
+    height: 160,
+    decoration: BoxDecoration(
+      shape: BoxShape.circle,
+      color: Colors.purpleAccent.withOpacity(0.28),
+    ),
+  );
+
+  Widget blurredLilac() => Container(
+    width: 260,
+    height: 260,
+    decoration: BoxDecoration(
+      shape: BoxShape.circle,
+      color: const Color.fromARGB(255, 219, 117, 250).withOpacity(0.28),
+    ),
+  );
 }
