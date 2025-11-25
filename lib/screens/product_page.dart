@@ -10,6 +10,25 @@ class ProductPage extends StatefulWidget {
   State<ProductPage> createState() => _ProductPageState();
 }
 
+class _OptionChip extends StatelessWidget {
+  final String label;
+
+  const _OptionChip({required this.label});
+
+  @override
+  Widget build(BuildContext context) {
+    return Container(
+      margin: const EdgeInsets.only(right: 8),
+      padding: const EdgeInsets.symmetric(horizontal: 14, vertical: 8),
+      decoration: BoxDecoration(
+        color: const Color(0xFFF1D9FB),
+        borderRadius: BorderRadius.circular(20),
+      ),
+      child: Text(label, style: const TextStyle(fontSize: 14)),
+    );
+  }
+}
+
 class _ProductPageState extends State<ProductPage> {
   int bottomIndex = 0;
 
@@ -29,7 +48,6 @@ class _ProductPageState extends State<ProductPage> {
         child: Column(
           crossAxisAlignment: CrossAxisAlignment.start,
           children: [
-            // TOP BAR --------------------------------------------------
             Padding(
               padding: const EdgeInsets.symmetric(horizontal: 15, vertical: 10),
               child: Row(
@@ -56,7 +74,6 @@ class _ProductPageState extends State<ProductPage> {
               ),
             ),
 
-            // PRODUCT IMAGE -------------------------------------------
             Padding(
               padding: const EdgeInsets.symmetric(horizontal: 15),
               child: ClipRRect(
@@ -70,7 +87,6 @@ class _ProductPageState extends State<ProductPage> {
               ),
             ),
 
-            // NAME + PRICE --------------------------------------------
             Padding(
               padding: const EdgeInsets.symmetric(horizontal: 15, vertical: 10),
               child: Row(
@@ -95,7 +111,6 @@ class _ProductPageState extends State<ProductPage> {
               ),
             ),
 
-            // OPTIONS --------------------------------------------------
             Padding(
               padding: const EdgeInsets.symmetric(horizontal: 15),
               child: Row(
@@ -107,7 +122,6 @@ class _ProductPageState extends State<ProductPage> {
 
                   const Spacer(),
 
-                  // STOCK COUNT
                   Text(
                     "${product["stock"]} in stock",
                     style: const TextStyle(
@@ -119,7 +133,6 @@ class _ProductPageState extends State<ProductPage> {
 
                   const SizedBox(width: 12),
 
-                  // HEART BUTTON (PURPLE)
                   StatefulBuilder(
                     builder: (context, setFavState) {
                       bool isFav = product["isFav"] ?? false;
@@ -162,7 +175,6 @@ class _ProductPageState extends State<ProductPage> {
               ),
             ),
 
-            // DESCRIPTION ---------------------------------------------
             const Padding(
               padding: EdgeInsets.fromLTRB(15, 10, 15, 3),
               child: Text(
@@ -184,7 +196,6 @@ class _ProductPageState extends State<ProductPage> {
 
             const Spacer(),
 
-            // BUTTONS --------------------------------------------------
             Padding(
               padding: const EdgeInsets.symmetric(horizontal: 15, vertical: 15),
               child: Row(
@@ -234,25 +245,6 @@ class _ProductPageState extends State<ProductPage> {
           ],
         ),
       ),
-    );
-  }
-}
-
-class _OptionChip extends StatelessWidget {
-  final String label;
-
-  const _OptionChip({required this.label});
-
-  @override
-  Widget build(BuildContext context) {
-    return Container(
-      margin: const EdgeInsets.only(right: 8),
-      padding: const EdgeInsets.symmetric(horizontal: 14, vertical: 8),
-      decoration: BoxDecoration(
-        color: const Color(0xFFF1D9FB),
-        borderRadius: BorderRadius.circular(20),
-      ),
-      child: Text(label, style: const TextStyle(fontSize: 14)),
     );
   }
 }
