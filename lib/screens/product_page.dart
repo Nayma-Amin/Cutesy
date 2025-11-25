@@ -1,0 +1,258 @@
+import 'package:flutter/material.dart';
+import 'package:shop_cutesy/widgets/bottom_navigation.dart';
+
+class ProductPage extends StatefulWidget {
+  final Map<String, dynamic> product;
+
+  const ProductPage({super.key, required this.product});
+
+  @override
+  State<ProductPage> createState() => _ProductPageState();
+}
+
+class _ProductPageState extends State<ProductPage> {
+  int bottomIndex = 0;
+
+  @override
+  Widget build(BuildContext context) {
+    final product = widget.product;
+
+    return Scaffold(
+      backgroundColor: const Color(0xFFFDF1F5),
+      bottomNavigationBar: BottomNavBar(
+        currentIndex: bottomIndex,
+        onTap: (index) {
+          setState(() => bottomIndex = index);
+        },
+      ),
+      body: SafeArea(
+        child: Column(
+          crossAxisAlignment: CrossAxisAlignment.start,
+          children: [
+            // TOP BAR --------------------------------------------------
+            Padding(
+              padding: const EdgeInsets.symmetric(horizontal: 15, vertical: 10),
+              child: Row(
+                children: [
+                  const Icon(Icons.menu, size: 30),
+                  const SizedBox(width: 10),
+                  Image.asset("assets/images/cutesy.png", width: 70),
+                  const Spacer(),
+                  Container(
+                    padding: const EdgeInsets.symmetric(
+                      horizontal: 18,
+                      vertical: 6,
+                    ),
+                    decoration: BoxDecoration(
+                      color: const Color(0xFFB564F7),
+                      borderRadius: BorderRadius.circular(20),
+                    ),
+                    child: const Text(
+                      "Log Out",
+                      style: TextStyle(color: Colors.white),
+                    ),
+                  ),
+                ],
+              ),
+            ),
+
+            // PRODUCT IMAGE -------------------------------------------
+            Padding(
+              padding: const EdgeInsets.symmetric(horizontal: 15),
+              child: ClipRRect(
+                borderRadius: BorderRadius.circular(18),
+                child: Image.asset(
+                  product["image"],
+                  height: 260,
+                  width: double.infinity,
+                  fit: BoxFit.cover,
+                ),
+              ),
+            ),
+
+            // NAME + PRICE --------------------------------------------
+            Padding(
+              padding: const EdgeInsets.symmetric(horizontal: 15, vertical: 10),
+              child: Row(
+                children: [
+                  Expanded(
+                    child: Text(
+                      product["name"],
+                      style: const TextStyle(
+                        fontWeight: FontWeight.bold,
+                        fontSize: 22,
+                      ),
+                    ),
+                  ),
+                  Text(
+                    "Tk. ${product["price"]}",
+                    style: const TextStyle(
+                      fontWeight: FontWeight.bold,
+                      fontSize: 20,
+                    ),
+                  ),
+                ],
+              ),
+            ),
+
+            // OPTIONS --------------------------------------------------
+            Padding(
+              padding: const EdgeInsets.symmetric(horizontal: 15),
+              child: Row(
+                children: [
+                  const Text(
+                    "Options",
+                    style: TextStyle(fontWeight: FontWeight.bold, fontSize: 17),
+                  ),
+
+                  const Spacer(),
+
+                  // STOCK COUNT
+                  Text(
+                    "${product["stock"]} in stock",
+                    style: const TextStyle(
+                      fontSize: 14,
+                      color: Colors.black54,
+                      fontWeight: FontWeight.w500,
+                    ),
+                  ),
+
+                  const SizedBox(width: 12),
+
+                  // HEART BUTTON (PURPLE)
+                  StatefulBuilder(
+                    builder: (context, setFavState) {
+                      bool isFav = product["isFav"] ?? false;
+
+                      return GestureDetector(
+                        onTap: () {
+                          setFavState(() {
+                            isFav = !isFav;
+                            product["isFav"] = isFav;
+                          });
+                        },
+                        child: Icon(
+                          isFav ? Icons.favorite : Icons.favorite_border,
+                          color: const Color(0xFFB564F7), // 💜 Figma Purple
+                          size: 26,
+                        ),
+                      );
+                    },
+                  ),
+                ],
+              ),
+            ),
+
+            const SizedBox(height: 5),
+
+            SizedBox(
+              height: 50,
+              child: ListView(
+                padding: const EdgeInsets.fromLTRB(15, 10, 0, 0),
+                scrollDirection: Axis.horizontal,
+                children: const [
+                  _OptionChip(label: "Cherry"),
+                  _OptionChip(label: "Berry-4"),
+                  _OptionChip(label: "Bow"),
+                  _OptionChip(label: "Heart-6"),
+                  _OptionChip(label: "Flower-1"),
+                  _OptionChip(label: "Flower-2"),
+                  _OptionChip(label: "Flower-8"),
+                ],
+              ),
+            ),
+
+            // DESCRIPTION ---------------------------------------------
+            const Padding(
+              padding: EdgeInsets.fromLTRB(15, 10, 15, 3),
+              child: Text(
+                "Description",
+                style: TextStyle(fontWeight: FontWeight.bold, fontSize: 17),
+              ),
+            ),
+
+            const Padding(
+              padding: EdgeInsets.symmetric(horizontal: 15),
+              child: Text(
+                "Handmade cute charms made from resin.\n"
+                "Charms include fruits, flowers, shapes and tiny details.\n"
+                "Each charm is handmade and uses fiber ribbon.\n"
+                "Can be used as a phone charm, keychain, bag charm, or bookmark.",
+                style: TextStyle(fontSize: 14, height: 1.4),
+              ),
+            ),
+
+            const Spacer(),
+
+            // BUTTONS --------------------------------------------------
+            Padding(
+              padding: const EdgeInsets.symmetric(horizontal: 15, vertical: 15),
+              child: Row(
+                children: [
+                  Expanded(
+                    child: Container(
+                      padding: const EdgeInsets.symmetric(vertical: 14),
+                      decoration: BoxDecoration(
+                        color: const Color(0xFFB564F7),
+                        borderRadius: BorderRadius.circular(12),
+                      ),
+                      child: const Center(
+                        child: Text(
+                          "Add to Cart",
+                          style: TextStyle(
+                            color: Colors.white,
+                            fontWeight: FontWeight.bold,
+                            fontSize: 16,
+                          ),
+                        ),
+                      ),
+                    ),
+                  ),
+                  const SizedBox(width: 15),
+                  Expanded(
+                    child: Container(
+                      padding: const EdgeInsets.symmetric(vertical: 14),
+                      decoration: BoxDecoration(
+                        color: const Color(0xFFB564F7),
+                        borderRadius: BorderRadius.circular(12),
+                      ),
+                      child: const Center(
+                        child: Text(
+                          "Reviews",
+                          style: TextStyle(
+                            color: Colors.white,
+                            fontWeight: FontWeight.w600,
+                            fontSize: 16,
+                          ),
+                        ),
+                      ),
+                    ),
+                  ),
+                ],
+              ),
+            ),
+          ],
+        ),
+      ),
+    );
+  }
+}
+
+class _OptionChip extends StatelessWidget {
+  final String label;
+
+  const _OptionChip({required this.label});
+
+  @override
+  Widget build(BuildContext context) {
+    return Container(
+      margin: const EdgeInsets.only(right: 8),
+      padding: const EdgeInsets.symmetric(horizontal: 14, vertical: 8),
+      decoration: BoxDecoration(
+        color: const Color(0xFFF1D9FB),
+        borderRadius: BorderRadius.circular(20),
+      ),
+      child: Text(label, style: const TextStyle(fontSize: 14)),
+    );
+  }
+}

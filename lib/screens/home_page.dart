@@ -1,4 +1,5 @@
 import 'package:flutter/material.dart';
+import 'package:shop_cutesy/screens/product_page.dart';
 import 'package:shop_cutesy/widgets/bottom_navigation.dart';
 
 class HomePage extends StatefulWidget {
@@ -30,21 +31,29 @@ class _HomePageState extends State<HomePage> {
       "name": "Ice Cream Wallet",
       "price": "950/-",
       "image": "assets/images/wallet1.webp",
+      "stock": 12, // <------ NEW
+      "isFav": false, // <------ NEW (optional)
     },
     {
       "name": "Washi – PET TAPE",
       "price": "1250/-",
       "image": "assets/images/stationary1.jpg",
+      "stock": 12, // <------ NEW
+      "isFav": false, // <------ NEW (optional)
     },
     {
       "name": "KNY Plushy Big",
       "price": "1350/-",
       "image": "assets/images/plush1.jpeg",
+      "stock": 12, // <------ NEW
+      "isFav": false, // <------ NEW (optional)
     },
     {
       "name": "Jelly Fish Charm",
       "price": "750/-",
       "image": "assets/images/charm5.jpg",
+      "stock": 12, // <------ NEW
+      "isFav": false, // <------ NEW (optional)
     },
   ];
 
@@ -68,7 +77,7 @@ class _HomePageState extends State<HomePage> {
           crossAxisAlignment: CrossAxisAlignment.start,
           children: [
             Padding(
-              padding: const EdgeInsets.symmetric(horizontal: 15, vertical: 5),
+              padding: const EdgeInsets.symmetric(horizontal: 15, vertical: 10),
               child: Row(
                 children: [
                   const Icon(Icons.menu, size: 30),
@@ -164,64 +173,76 @@ class _HomePageState extends State<HomePage> {
                 itemBuilder: (context, index) {
                   final product = sampleProducts[index];
 
-                  return Container(
-                    decoration: BoxDecoration(
-                      color: Colors.white,
-                      borderRadius: BorderRadius.circular(18),
-                      boxShadow: [
-                        BoxShadow(
-                          color: Colors.black.withOpacity(0.07),
-                          blurRadius: 6,
-                          spreadRadius: 2,
+                  return GestureDetector(
+                    onTap: () {
+                      Navigator.push(
+                        context,
+                        MaterialPageRoute(
+                          builder: (_) => ProductPage(product: product),
                         ),
-                      ],
-                    ),
-                    child: Column(
-                      crossAxisAlignment: CrossAxisAlignment.start,
-                      children: [
-                        ClipRRect(
-                          borderRadius: const BorderRadius.vertical(
-                            top: Radius.circular(18),
+                      );
+                    },
+                    child: Container(
+                      decoration: BoxDecoration(
+                        color: Colors.white,
+                        borderRadius: BorderRadius.circular(18),
+                        boxShadow: [
+                          BoxShadow(
+                            color: Colors.black.withOpacity(0.07),
+                            blurRadius: 6,
+                            spreadRadius: 2,
                           ),
-                          child: Image.asset(
-                            product["image"],
-                            height: 150,
-                            width: double.infinity,
-                            fit: BoxFit.cover,
-                          ),
-                        ),
-
-                        Padding(
-                          padding: const EdgeInsets.all(8),
-                          child: Text(
-                            product["name"],
-                            style: const TextStyle(
-                              fontWeight: FontWeight.w600,
-                              fontSize: 14,
+                        ],
+                      ),
+                      child: Column(
+                        crossAxisAlignment: CrossAxisAlignment.start,
+                        children: [
+                          ClipRRect(
+                            borderRadius: const BorderRadius.vertical(
+                              top: Radius.circular(18),
+                            ),
+                            child: Image.asset(
+                              product["image"],
+                              height: 150,
+                              width: double.infinity,
+                              fit: BoxFit.cover,
                             ),
                           ),
-                        ),
 
-                        Padding(
-                          padding: const EdgeInsets.symmetric(horizontal: 8.0),
-                          child: Row(
-                            children: [
-                              Text(
-                                "Tk. ${product["price"]}",
-                                style: const TextStyle(
-                                  fontWeight: FontWeight.bold,
-                                  fontSize: 14,
-                                ),
+                          Padding(
+                            padding: const EdgeInsets.all(8),
+                            child: Text(
+                              product["name"],
+                              style: const TextStyle(
+                                fontWeight: FontWeight.w600,
+                                fontSize: 14,
                               ),
-                              const Spacer(),
-                              const Icon(
-                                Icons.favorite_border,
-                                color: Color(0xFFB564F7),
-                              ),
-                            ],
+                            ),
                           ),
-                        ),
-                      ],
+
+                          Padding(
+                            padding: const EdgeInsets.symmetric(
+                              horizontal: 8.0,
+                            ),
+                            child: Row(
+                              children: [
+                                Text(
+                                  "Tk. ${product["price"]}",
+                                  style: const TextStyle(
+                                    fontWeight: FontWeight.bold,
+                                    fontSize: 14,
+                                  ),
+                                ),
+                                const Spacer(),
+                                const Icon(
+                                  Icons.favorite_border,
+                                  color: Color(0xFFB564F7),
+                                ),
+                              ],
+                            ),
+                          ),
+                        ],
+                      ),
                     ),
                   );
                 },
