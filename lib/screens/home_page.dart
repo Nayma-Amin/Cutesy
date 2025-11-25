@@ -1,4 +1,5 @@
 import 'package:flutter/material.dart';
+import 'package:shop_cutesy/widgets/bottom_navigation.dart';
 
 class HomePage extends StatefulWidget {
   const HomePage({super.key});
@@ -8,6 +9,7 @@ class HomePage extends StatefulWidget {
 }
 
 class _HomePageState extends State<HomePage> {
+  int bottomIndex = 0;
   final List<String> filters = const [
     'All',
     'Wallets',
@@ -183,7 +185,7 @@ class _HomePageState extends State<HomePage> {
                           ),
                           child: Image.asset(
                             product["image"],
-                            height: 130,
+                            height: 150,
                             width: double.infinity,
                             fit: BoxFit.cover,
                           ),
@@ -227,6 +229,14 @@ class _HomePageState extends State<HomePage> {
             ),
           ],
         ),
+      ),
+      bottomNavigationBar: BottomNavBar(
+        currentIndex: bottomIndex,
+        onTap: (index) {
+          setState(() {
+            bottomIndex = index;
+          });
+        },
       ),
     );
   }
