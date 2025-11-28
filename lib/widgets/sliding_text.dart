@@ -29,8 +29,8 @@ class _SlidingTextState extends State<SlidingText>
     )..repeat();
 
     _animation = Tween<Offset>(
-      begin: const Offset(1, 0), // start just outside right
-      end: const Offset(-1, 0),  // end just outside left
+      begin: const Offset(1, 0),
+      end: const Offset(-1, 0),
     ).animate(CurvedAnimation(parent: _controller, curve: Curves.linear));
   }
 
@@ -42,14 +42,13 @@ class _SlidingTextState extends State<SlidingText>
 
   @override
   Widget build(BuildContext context) {
-    // full screen width
     final screenWidth = MediaQuery.of(context).size.width;
 
     return Center(
       child: Container(
-        width: screenWidth, // full screen width
+        width: screenWidth,
         height: 40,
-        color: Colors.purple.shade50, // optional background
+        color: Colors.purple.shade50,
         child: ClipRect(
           child: SlideTransition(
             position: _animation,
@@ -62,7 +61,7 @@ class _SlidingTextState extends State<SlidingText>
                   fontWeight: FontWeight.bold,
                   color: Colors.purple,
                 ),
-                maxLines: 1, // ensure single line
+                maxLines: 1,
                 overflow: TextOverflow.visible,
               ),
             ),

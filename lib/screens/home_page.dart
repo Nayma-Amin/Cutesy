@@ -180,7 +180,7 @@ class _HomePageState extends State<HomePage> {
                 
                           child: SlidingText(
                             text:
-                                "Welcome to Cutesy $username!",
+                                "Welcome to Cutesy $username! Enjoy our biggest sales this year and stay connected with us.",
                             speed: 40,
                           ),
                         ),
