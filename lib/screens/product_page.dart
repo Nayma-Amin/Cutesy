@@ -322,7 +322,9 @@ class _ProductPageState extends State<ProductPage>
                             ),
                           ),
                         ),
+                        
                       ),
+                      
                     ),
                     const SizedBox(width: 15),
                     Expanded(

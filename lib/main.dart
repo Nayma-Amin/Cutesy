@@ -1,6 +1,11 @@
 import 'package:firebase_core/firebase_core.dart';
 import 'package:flutter/material.dart';
+import 'package:shop_cutesy/screens/auth/log_in.dart';
+import 'package:shop_cutesy/screens/auth/reset_password.dart';
+import 'package:shop_cutesy/screens/auth/sign_up.dart';
+import 'package:shop_cutesy/screens/cart_page.dart';
 import 'package:shop_cutesy/screens/home_page.dart';
+import 'package:shop_cutesy/screens/profile_page.dart';
 import 'package:shop_cutesy/screens/splash_screen.dart';
 
 void main() async {
@@ -17,7 +22,7 @@ class MyApp extends StatelessWidget {
     return MaterialApp(
       title: 'Shop Cutesy',
       theme: ThemeData(
-        fontFamily: 'Lato',
+        fontFamily: 'Vollkorn',
         colorScheme: ColorScheme.fromSeed(
           seedColor: const Color(0xFFE370EE),
           primary: const Color(0xFFE370EE),
@@ -35,6 +40,11 @@ class MyApp extends StatelessWidget {
       routes: {
         '/splash': (context) => const SplashScreen(),
         '/home': (context) => const HomePage(),
+        '/signup': (context) => const SignupPage(),
+        '/login': (context) => const LoginPage(),
+        '/cart': (context) => const CartPage(),
+        '/profile': (context) => const ProfilePage(),
+        '/reset': (context) => const ResetPage(),
       },
     );
   }

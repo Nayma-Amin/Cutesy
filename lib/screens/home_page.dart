@@ -1,6 +1,14 @@
+import 'package:firebase_auth/firebase_auth.dart';
 import 'package:flutter/material.dart';
+import 'package:shared_preferences/shared_preferences.dart';
+import 'package:shop_cutesy/screens/auth/sign_up.dart';
+import 'package:shop_cutesy/screens/cart_page.dart';
 import 'package:shop_cutesy/screens/product_page.dart';
+import 'package:shop_cutesy/screens/profile_page.dart';
+import 'package:shop_cutesy/screens/services/authentication.dart';
+import 'package:shop_cutesy/utils/purple_box.dart';
 import 'package:shop_cutesy/widgets/bottom_navigation.dart';
+import 'package:shop_cutesy/widgets/sliding_text.dart';
 
 class HomePage extends StatefulWidget {
   const HomePage({super.key});
@@ -31,36 +39,58 @@ class _HomePageState extends State<HomePage> {
       "name": "Ice Cream Wallet",
       "price": "950/-",
       "image": "assets/images/wallet1.webp",
-      "stock": 12, // <------ NEW
-      "isFav": false, // <------ NEW (optional)
+      "stock": 12,
+      "isFav": false,
     },
     {
       "name": "Washi – PET TAPE",
       "price": "1250/-",
       "image": "assets/images/stationary1.jpg",
-      "stock": 12, // <------ NEW
-      "isFav": false, // <------ NEW (optional)
+      "stock": 12,
+      "isFav": false,
     },
     {
       "name": "KNY Plushy Big",
       "price": "1350/-",
       "image": "assets/images/plush1.jpeg",
-      "stock": 12, // <------ NEW
-      "isFav": false, // <------ NEW (optional)
+      "stock": 12,
+      "isFav": false,
     },
     {
       "name": "Jelly Fish Charm",
       "price": "750/-",
       "image": "assets/images/charm5.jpg",
-      "stock": 12, // <------ NEW
-      "isFav": false, // <------ NEW (optional)
+      "stock": 12,
+      "isFav": false,
     },
   ];
+
+  String username = "";
+  bool _animate = false;
 
   @override
   void initState() {
     super.initState();
+
+    FirebaseAuth.instance.authStateChanges().listen((user) {
+      loadUser();
+      setState(() {});
+    });
+
     filterSelected = filters[0];
+    loadUser();
+  }
+
+  void loadUser() async {
+    if (FirebaseAuth.instance.currentUser == null) {
+      username = "";
+      setState(() => _animate = false);
+      return;
+    }
+
+    username = await AuthService().getUsername() ?? "";
+    await Future.delayed(const Duration(milliseconds: 400));
+    setState(() => _animate = true);
   }
 
   @override
@@ -84,23 +114,83 @@ class _HomePageState extends State<HomePage> {
                   const SizedBox(width: 10),
                   Image.asset("assets/images/cutesy.png", width: 70),
                   const Spacer(),
-                  Container(
-                    padding: const EdgeInsets.symmetric(
-                      horizontal: 18,
-                      vertical: 6,
+
+                  if (FirebaseAuth.instance.currentUser != null)
+                    GestureDetector(
+                      onTap: () async {
+                        await FirebaseAuth.instance.signOut();
+
+                        final prefs = await SharedPreferences.getInstance();
+                        await prefs.remove("savedEmail");
+                        await prefs.remove("savedPass");
+
+                        setState(() {});
+                      },
+                      child: Container(
+                        padding: const EdgeInsets.symmetric(
+                          horizontal: 18,
+                          vertical: 6,
+                        ),
+                        decoration: BoxDecoration(
+                          color: const Color(0xFFB564F7),
+                          borderRadius: BorderRadius.circular(20),
+                        ),
+                        child: const Text(
+                          "Log Out",
+                          style: TextStyle(color: Colors.white),
+                        ),
+                      ),
                     ),
-                    decoration: BoxDecoration(
-                      color: Color(0xFFB564F7),
-                      borderRadius: BorderRadius.circular(20),
+
+                  if (FirebaseAuth.instance.currentUser == null)
+                    GestureDetector(
+                      onTap: () => Navigator.pushNamed(context, "/login"),
+                      child: const Text(
+                        "Log In",
+                        style: TextStyle(
+                          color: btnPurple,
+                          fontWeight: FontWeight.bold,
+                          fontSize: 16,
+                        ),
+                      ),
                     ),
-                    child: const Text(
-                      "Log Out",
-                      style: TextStyle(color: Colors.white),
-                    ),
-                  ),
                 ],
               ),
             ),
+
+            if (AuthService().isLoggedIn)
+              Center(
+                child: AnimatedOpacity(
+                  opacity: _animate ? 1 : 0,
+                  duration: const Duration(milliseconds: 600),
+                  child: Padding(
+                    padding: const EdgeInsets.symmetric(
+                      horizontal: 5,
+                      vertical: 5,
+                    ),
+                    child: Column(
+                      crossAxisAlignment: CrossAxisAlignment.start,
+                      children: [
+                        AnimatedSlide(
+                          offset: _animate
+                              ? const Offset(0, 0)
+                              : const Offset(-1.5, 0),
+                          duration: const Duration(milliseconds: 600),
+                          curve: Curves.easeOut,
+                
+                          child: SlidingText(
+                            text:
+                                "Welcome to Cutesy $username!",
+                            speed: 40,
+                          ),
+                        ),
+                      ],
+                    ),
+                  ),
+                ),
+              )
+            else
+              const SizedBox.shrink(),
 
             const Row(
               children: [
@@ -257,6 +347,27 @@ class _HomePageState extends State<HomePage> {
           setState(() {
             bottomIndex = index;
           });
+
+          if (index == 2) {
+            Navigator.push(
+              context,
+              MaterialPageRoute(builder: (_) => const CartPage()),
+            );
+          }
+
+          if (index == 3) {
+            if (AuthService().isLoggedIn) {
+              Navigator.push(
+                context,
+                MaterialPageRoute(builder: (_) => const ProfilePage()),
+              );
+            } else {
+              Navigator.push(
+                context,
+                MaterialPageRoute(builder: (_) => const SignupPage()),
+              );
+            }
+          }
         },
       ),
     );
