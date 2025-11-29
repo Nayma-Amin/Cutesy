@@ -31,7 +31,7 @@ class _OptionChip extends StatelessWidget {
 
 class _ProductPageState extends State<ProductPage>
     with SingleTickerProviderStateMixin {
-  int bottomIndex = 0;
+  int bottomIndex = -1;
   int quantity = 1;
   late bool isFav;
 
@@ -86,12 +86,7 @@ class _ProductPageState extends State<ProductPage>
 
     return Scaffold(
       backgroundColor: const Color(0xFFFDF1F5),
-      bottomNavigationBar: BottomNavBar(
-        currentIndex: bottomIndex,
-        onTap: (index) {
-          setState(() => bottomIndex = index);
-        },
-      ),
+
       body: SafeArea(
         child: SingleChildScrollView(
           physics: BouncingScrollPhysics(),
@@ -322,9 +317,7 @@ class _ProductPageState extends State<ProductPage>
                             ),
                           ),
                         ),
-                        
                       ),
-                      
                     ),
                     const SizedBox(width: 15),
                     Expanded(
@@ -352,6 +345,25 @@ class _ProductPageState extends State<ProductPage>
             ],
           ),
         ),
+      ),
+
+      bottomNavigationBar: BottomNavBar(
+        currentIndex: bottomIndex,
+        onTap: (index) {
+          if (index == 0) {
+            Navigator.pushNamedAndRemoveUntil(context, '/home', (_) => false);
+          } else if (index == 1) {
+            Navigator.pushNamedAndRemoveUntil(context, '/offer', (_) => false);
+          } else if (index == 2) {
+            Navigator.pushNamedAndRemoveUntil(context, '/cart', (_) => false);
+          } else if (index == 3) {
+            Navigator.pushNamedAndRemoveUntil(
+              context,
+              '/profile',
+              (_) => false,
+            );
+          }
+        },
       ),
     );
   }

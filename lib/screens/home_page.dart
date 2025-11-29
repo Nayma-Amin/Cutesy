@@ -1,8 +1,10 @@
 import 'package:firebase_auth/firebase_auth.dart';
 import 'package:flutter/material.dart';
 import 'package:shared_preferences/shared_preferences.dart';
+import 'package:shop_cutesy/main.dart';
 import 'package:shop_cutesy/screens/auth/sign_up.dart';
 import 'package:shop_cutesy/screens/cart_page.dart';
+import 'package:shop_cutesy/screens/offer_page.dart';
 import 'package:shop_cutesy/screens/product_page.dart';
 import 'package:shop_cutesy/screens/profile_page.dart';
 import 'package:shop_cutesy/screens/services/authentication.dart';
@@ -17,7 +19,7 @@ class HomePage extends StatefulWidget {
   State<HomePage> createState() => _HomePageState();
 }
 
-class _HomePageState extends State<HomePage> {
+class _HomePageState extends State<HomePage> with RouteAware {
   int bottomIndex = 0;
   final List<String> filters = const [
     'All',
@@ -91,6 +93,25 @@ class _HomePageState extends State<HomePage> {
     username = await AuthService().getUsername() ?? "";
     await Future.delayed(const Duration(milliseconds: 400));
     setState(() => _animate = true);
+  }
+
+  @override
+  void didChangeDependencies() {
+    super.didChangeDependencies();
+    routeObserver.subscribe(this, ModalRoute.of(context)! as PageRoute);
+  }
+
+  @override
+  void dispose() {
+    routeObserver.unsubscribe(this);
+    super.dispose();
+  }
+
+  @override
+  void didPopNext() {
+    setState(() {
+      bottomIndex = 0;
+    });
   }
 
   @override
@@ -177,7 +198,7 @@ class _HomePageState extends State<HomePage> {
                               : const Offset(-1.5, 0),
                           duration: const Duration(milliseconds: 600),
                           curve: Curves.easeOut,
-                
+
                           child: SlidingText(
                             text:
                                 "Welcome to Cutesy $username! Enjoy our biggest sales this year and stay connected with us.",
@@ -348,6 +369,20 @@ class _HomePageState extends State<HomePage> {
             bottomIndex = index;
           });
 
+          if (index == 0) {
+            Navigator.push(
+              context,
+              MaterialPageRoute(builder: (_) => const HomePage()),
+            );
+          }
+
+          if (index == 1) {
+            Navigator.push(
+              context,
+              MaterialPageRoute(builder: (_) => const OfferPage()),
+            );
+          }
+
           if (index == 2) {
             Navigator.push(
               context,
@@ -356,7 +391,9 @@ class _HomePageState extends State<HomePage> {
           }
 
           if (index == 3) {
-            if (AuthService().isLoggedIn) {
+            final user = FirebaseAuth.instance.currentUser;
+
+            if (user != null) {
               Navigator.push(
                 context,
                 MaterialPageRoute(builder: (_) => const ProfilePage()),

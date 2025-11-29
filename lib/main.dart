@@ -5,6 +5,7 @@ import 'package:shop_cutesy/screens/auth/reset_password.dart';
 import 'package:shop_cutesy/screens/auth/sign_up.dart';
 import 'package:shop_cutesy/screens/cart_page.dart';
 import 'package:shop_cutesy/screens/home_page.dart';
+import 'package:shop_cutesy/screens/offer_page.dart';
 import 'package:shop_cutesy/screens/profile_page.dart';
 import 'package:shop_cutesy/screens/splash_screen.dart';
 
@@ -13,13 +14,16 @@ void main() async {
   await Firebase.initializeApp();
   runApp(const MyApp());
 }
+final RouteObserver<PageRoute> routeObserver = RouteObserver<PageRoute>();
 
 class MyApp extends StatelessWidget {
   const MyApp({super.key});
+  
 
   @override
   Widget build(BuildContext context) {
     return MaterialApp(
+      navigatorObservers: [routeObserver],
       title: 'Shop Cutesy',
       theme: ThemeData(
         fontFamily: 'Vollkorn',
@@ -45,6 +49,7 @@ class MyApp extends StatelessWidget {
         '/cart': (context) => const CartPage(),
         '/profile': (context) => const ProfilePage(),
         '/reset': (context) => const ResetPage(),
+        '/offer': (context) => const OfferPage(),
       },
     );
   }

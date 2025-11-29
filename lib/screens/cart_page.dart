@@ -1,6 +1,12 @@
 import 'dart:convert';
 import 'package:flutter/material.dart';
 import 'package:shared_preferences/shared_preferences.dart';
+import 'package:shop_cutesy/widgets/bottom_navigation.dart';
+import 'package:shop_cutesy/screens/home_page.dart';
+import 'package:shop_cutesy/screens/offer_page.dart';
+import 'package:shop_cutesy/screens/profile_page.dart';
+import 'package:shop_cutesy/screens/auth/sign_up.dart';
+import 'package:firebase_auth/firebase_auth.dart';
 
 class CartPage extends StatefulWidget {
   const CartPage({super.key});
@@ -11,6 +17,8 @@ class CartPage extends StatefulWidget {
 
 class _CartPageState extends State<CartPage> {
   List<Map<String, dynamic>> cartItems = [];
+  
+  int bottomIndex = 2; // <-- Cart tab selected
 
   @override
   void initState() {
@@ -150,7 +158,8 @@ class _CartPageState extends State<CartPage> {
                                                 index, item["quantity"] - 1);
                                           }
                                         },
-                                        child: const Icon(Icons.remove, size: 20),
+                                        child:
+                                            const Icon(Icons.remove, size: 20),
                                       ),
                                       const SizedBox(width: 10),
                                       Text(
@@ -198,69 +207,46 @@ class _CartPageState extends State<CartPage> {
               },
             ),
 
-      bottomNavigationBar: cartItems.isEmpty
-          ? null
-          : Container(
-              padding: const EdgeInsets.symmetric(horizontal: 20, vertical: 16),
-              decoration: BoxDecoration(
-                color: Colors.white,
-                borderRadius: const BorderRadius.only(
-                  topLeft: Radius.circular(18),
-                  topRight: Radius.circular(18),
-                ),
-                boxShadow: [
-                  BoxShadow(
-                    color: Colors.black.withOpacity(0.09),
-                    blurRadius: 8,
-                    offset: const Offset(0, -2),
-                  )
-                ],
-              ),
-              child: Column(
-                mainAxisSize: MainAxisSize.min,
-                children: [
-                  Row(
-                    mainAxisAlignment: MainAxisAlignment.spaceBetween,
-                    children: [
-                      const Text(
-                        "Total:",
-                        style: TextStyle(
-                          fontSize: 18,
-                          fontWeight: FontWeight.w600,
-                        ),
-                      ),
-                      Text(
-                        "Tk. $totalPrice",
-                        style: const TextStyle(
-                          fontWeight: FontWeight.bold,
-                          fontSize: 20,
-                        ),
-                      ),
-                    ],
-                  ),
+      bottomNavigationBar: BottomNavBar(
+        currentIndex: bottomIndex,
+        onTap: (index) {
+          setState(() => bottomIndex = index);
 
-                  const SizedBox(height: 15),
+          if (index == 0) {
+            Navigator.push(
+              context,
+              MaterialPageRoute(builder: (_) => const HomePage()),
+            );
+          }
 
-                  Container(
-                    padding: const EdgeInsets.symmetric(vertical: 14),
-                    decoration: BoxDecoration(
-                      color: const Color(0xFFB564F7),
-                      borderRadius: BorderRadius.circular(14),
-                    ),
-                    child: const Center(
-                      child: Text(
-                        "Checkout",
-                        style: TextStyle(
-                          color: Colors.white,
-                          fontWeight: FontWeight.bold,
-                          fontSize: 17,
-                        ),
-                      ),
-                    ),
-                  ),
-                ],
-              ),
-            ),
+          if (index == 1) {
+            Navigator.push(
+              context,
+              MaterialPageRoute(builder: (_) => const OfferPage()),
+            );
+          }
+
+          if (index == 2) {
+            // Already in Cart → do nothing
+          }
+
+          if (index == 3) {
+            final user = FirebaseAuth.instance.currentUser;
+
+            if (user != null) {
+              Navigator.push(
+                context,
+                MaterialPageRoute(builder: (_) => const ProfilePage()),
+              );
+            } else {
+              Navigator.push(
+                context,
+                MaterialPageRoute(builder: (_) => const SignupPage()),
+              );
+            }
+          }
+        },
+      ),
     );
   }
 }

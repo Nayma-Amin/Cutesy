@@ -12,7 +12,6 @@ class BottomNavBar extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-
     return Container(
       decoration: BoxDecoration(
         color: Colors.white,
@@ -25,11 +24,13 @@ class BottomNavBar extends StatelessWidget {
         ],
       ),
       child: BottomNavigationBar(
-        currentIndex: currentIndex,
+        // 🔥 Prevent Flutter crash if index = -1
+        currentIndex: currentIndex == -1 ? 0 : currentIndex,
+
         onTap: onTap,
         type: BottomNavigationBarType.fixed,
         elevation: 0,
-        backgroundColor: Colors.white,
+        backgroundColor: const Color(0xFFFDF1F5),
 
         showSelectedLabels: false,
         showUnselectedLabels: false,
@@ -46,14 +47,19 @@ class BottomNavBar extends StatelessWidget {
 
   BottomNavigationBarItem _navItem(
       IconData icon, int index, int currentIndex) {
-    final bool isActive = index == currentIndex;
+    
+    // 🔥 NEW: If currentIndex = -1 → force all icons unselected
+    final bool isActive =
+        currentIndex != -1 && index == currentIndex;
 
     return BottomNavigationBarItem(
       icon: AnimatedContainer(
         duration: const Duration(milliseconds: 180),
         padding: const EdgeInsets.all(8),
         decoration: BoxDecoration(
-          color: isActive ? const Color.fromARGB(255, 255, 255, 255).withOpacity(0.2) : Colors.transparent,
+          color: isActive
+              ? const Color.fromARGB(255, 255, 255, 255).withOpacity(0.2)
+              : Colors.transparent,
           borderRadius: BorderRadius.circular(10),
         ),
         child: Icon(
