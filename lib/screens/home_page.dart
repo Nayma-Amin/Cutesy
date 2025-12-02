@@ -4,6 +4,7 @@ import 'package:flutter/material.dart';
 import 'package:shop_cutesy/main.dart';
 import 'package:shop_cutesy/screens/auth/sign_up.dart';
 import 'package:shop_cutesy/screens/cart_page.dart';
+import 'package:shop_cutesy/screens/management.dart';
 import 'package:shop_cutesy/screens/offer_page.dart';
 import 'package:shop_cutesy/screens/product_page.dart';
 import 'package:shop_cutesy/screens/profile_page.dart';
@@ -344,7 +345,17 @@ class _HomePageState extends State<HomePage> with RouteAware {
                   isVisible: menuVisible,
                   onItemTap: (value) {
                     setState(() => menuVisible = false);
+
+                    if (value == "Management") {
+                      Navigator.push(
+                        context,
+                        MaterialPageRoute(
+                          builder: (_) => const ManagementPage(),
+                        ),
+                      );
+                    }
                   },
+
                   userRole: userRole,
                 ),
               ),
