@@ -17,6 +17,15 @@ class AuthService {
     required String address,
   }) async {
     try {
+      QuerySnapshot phoneSnap = await _db
+          .collection("users")
+          .where("phone", isEqualTo: phone)
+          .get();
+
+      if (phoneSnap.docs.isNotEmpty) {
+        return "This phone number is already registered.";
+      }
+
       UserCredential cred = await _auth.createUserWithEmailAndPassword(
         email: email,
         password: password,
@@ -35,12 +44,16 @@ class AuthService {
       });
 
       return null;
+    } on FirebaseAuthException catch (e) {
+      try {
+        await _auth.currentUser?.delete();
+      } catch (_) {}
+      return e.message;
     } catch (e) {
       try {
         await _auth.currentUser?.delete();
       } catch (_) {}
-
-      return e.toString();
+      return "Something went wrong. Please try again.";
     }
   }
 

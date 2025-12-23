@@ -1,7 +1,13 @@
 import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:firebase_auth/firebase_auth.dart';
 import 'package:flutter/material.dart';
+import 'package:shop_cutesy/screens/coupon_page.dart';
+import 'package:shop_cutesy/screens/order_manage.dart';
 import 'package:shop_cutesy/screens/product_manage.dart';
+import 'package:shop_cutesy/screens/review_manage.dart';
+import 'package:shop_cutesy/screens/graph_analytics.dart';
+import 'package:shop_cutesy/screens/terms_conditions.dart';
+import 'package:shop_cutesy/screens/user_manage.dart';
 import 'package:shop_cutesy/utils/purple_box.dart';
 import 'package:shop_cutesy/widgets/bottom_navigation.dart';
 import 'package:shop_cutesy/widgets/top_bar.dart';
@@ -18,14 +24,15 @@ class _ManagementPageState extends State<ManagementPage> {
   String userRole = "manager";
   bool menuVisible = false;
   int bottomIndex = -1;
+  String username = "";
 
   @override
   void initState() {
     super.initState();
-    _loadUserRole();
+    _loadUserInfo();
   }
 
-  Future<void> _loadUserRole() async {
+  Future<void> _loadUserInfo() async {
     final current = FirebaseAuth.instance.currentUser;
     if (current == null) return;
 
@@ -36,7 +43,13 @@ class _ManagementPageState extends State<ManagementPage> {
 
     setState(() {
       userRole = doc["role"] ?? "manager";
+      username = doc["name"] ?? "";
     });
+  }
+
+  Future<void> _logout() async {
+    await FirebaseAuth.instance.signOut();
+    Navigator.pushNamedAndRemoveUntil(context, '/login', (_) => false);
   }
 
   Widget _purpleActionButton(String text) {
@@ -94,42 +107,42 @@ class _ManagementPageState extends State<ManagementPage> {
                       children: [
                         const SizedBox(height: 5),
 
-                        const Text(
-                          "Management",
-                          style: TextStyle(
-                            fontWeight: FontWeight.bold,
-                            fontSize: 26,
+                        if (userRole == "admin") ...[
+                          const Text(
+                            "Management",
+                            style: TextStyle(
+                              fontWeight: FontWeight.bold,
+                              fontSize: 26,
+                            ),
                           ),
+
+                          const SizedBox(height: 15),
+                          managementBox(
+                            "Admins",
+                          onTap: () {
+                            Navigator.push(
+                              context,
+                              MaterialPageRoute(
+                                builder: (_) => const UserManage(openTab: "admin"),
+                              ),
+                            );
+                          },
+                        ),
+                          managementBox(
+                            "Managers",
+                          onTap: () {
+                            Navigator.push(
+                              context,
+                              MaterialPageRoute(
+                                builder: (_) => const UserManage(openTab: "manager"),
+                              ),
+                            );
+                          },
                         ),
 
-                        const SizedBox(height: 15),
-
-                        if (userRole == "admin") ...[
-                          Row(
-                            mainAxisAlignment: MainAxisAlignment.spaceEvenly,
-                            children: [
-                              _purpleActionButton("Add Admin"),
-                              _purpleActionButton("Add Manager"),
-                            ],
-                          ),
-                          const SizedBox(height: 20),
+                          const SizedBox(height: 15),
                         ],
 
-                        if (userRole == "manager") ...[
-                          Row(
-                            mainAxisAlignment: MainAxisAlignment.spaceEvenly,
-                            children: [
-                              _purpleActionButton("Add User"),
-                              _purpleActionButton("Delete User"),
-                            ],
-                          ),
-                          const SizedBox(height: 20),
-                        ],
-
-                        managementBox("Admins"),
-                        managementBox("Managers"),
-
-                        const SizedBox(height: 15),
                         const Text(
                           "Manage Database",
                           style: TextStyle(
@@ -139,11 +152,29 @@ class _ManagementPageState extends State<ManagementPage> {
                         ),
                         const SizedBox(height: 10),
 
-                        managementBox("Users Details"),
-                        managementBox("Total Orders"),
-                        managementBox("Delivered Orders"),
-                        managementBox("Canceled Orders"),
-                        managementBox("Pending Order Details"),
+                        managementBox("Users",
+                        onTap: () {
+                            Navigator.push(
+                              context,
+                              MaterialPageRoute(
+                                builder: (_) => const UserManage(openTab: "user"),
+                              ),
+                            );
+                          },
+                        ),
+
+                        managementBox(
+                          "Orders",
+                        onTap: () {
+                            Navigator.push(
+                              context,
+                              MaterialPageRoute(
+                                builder: (_) => const OrderManage(),
+                              ),
+                            );
+                          },
+                        ),
+
                         managementBox(
                           "Products",
                           onTap: () {
@@ -156,7 +187,53 @@ class _ManagementPageState extends State<ManagementPage> {
                           },
                         ),
 
-                        managementBox("Approvals"),
+                        managementBox(
+                          "Coupons",
+                          onTap: () {
+                            Navigator.push(
+                              context,
+                              MaterialPageRoute(
+                                builder: (_) => const CouponPage(),
+                              ),
+                            );
+                          },
+                        ),
+
+                        managementBox(
+                          "Reviews",
+                          onTap: () {
+                            Navigator.push(
+                              context,
+                              MaterialPageRoute(
+                                builder: (_) => const ReviewManage(),
+                              ),
+                            );
+                          },
+                        ),
+
+                        managementBox(
+                          "Terms & Conditions",
+                          onTap: () {
+                            Navigator.push(
+                              context,
+                              MaterialPageRoute(
+                                builder: (_) => const TermsManage(),
+                              ),
+                            );
+                          },
+                        ),
+
+                        managementBox(
+                          "Graphs & Analytics",
+                          onTap: () {
+                            Navigator.push(
+                              context,
+                              MaterialPageRoute(
+                                builder: (_) => const GraphAnalytics(),
+                              ),
+                            );
+                          },
+                        ),
 
                         const SizedBox(height: 15),
                         const Text(
@@ -182,7 +259,27 @@ class _ManagementPageState extends State<ManagementPage> {
                 child: DropMenu(
                   isVisible: menuVisible,
                   userRole: userRole,
-                  onItemTap: (_) => setState(() => menuVisible = false),
+                  onItemTap: (value) async {
+                    setState(() => menuVisible = false);
+
+                    if (value == "Logout") {
+                      await _logout();
+                    } else if (value == "Management") {
+                      Navigator.push(
+                        context,
+                        MaterialPageRoute(
+                          builder: (_) => const ManagementPage(),
+                        ),
+                      );
+                    } else if (value == "Terms and Conditions") {
+                      Navigator.push(
+                        context,
+                        MaterialPageRoute(
+                          builder: (_) => const TermsManage(),
+                        ),
+                      );
+                    }
+                  },
                 ),
               ),
           ],

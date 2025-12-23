@@ -24,7 +24,6 @@ class BottomNavBar extends StatelessWidget {
         ],
       ),
       child: BottomNavigationBar(
-        // 🔥 Prevent Flutter crash if index = -1
         currentIndex: currentIndex == -1 ? 0 : currentIndex,
 
         onTap: onTap,
@@ -48,7 +47,6 @@ class BottomNavBar extends StatelessWidget {
   BottomNavigationBarItem _navItem(
       IconData icon, int index, int currentIndex) {
     
-    // 🔥 NEW: If currentIndex = -1 → force all icons unselected
     final bool isActive =
         currentIndex != -1 && index == currentIndex;
 

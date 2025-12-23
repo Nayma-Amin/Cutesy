@@ -1,4 +1,6 @@
 import 'package:flutter/material.dart';
+import 'package:url_launcher/url_launcher.dart';
+import 'package:share_plus/share_plus.dart';
 
 class DropMenu extends StatelessWidget {
   final bool isVisible;
@@ -12,11 +14,20 @@ class DropMenu extends StatelessWidget {
     required this.userRole,
   });
 
+  static const String adminEmail = "admin@shopcutesy.com";
+  static const String facebookPageUrl =
+      "https://www.facebook.com/your_facebook_page";
+  static const String instagramPageUrl =
+      "https://www.instagram.com/your_instagram_page";
+  static const String shopAddressMapUrl =
+      "https://www.google.com/maps/search/?api=1&query=Shop+Cutesy+Dhaka";
+  static const String appShareText =
+      "Check out Shop Cutesy! 💜\nDownload now:\nhttps://yourapp.link";
+
   @override
   Widget build(BuildContext context) {
     final items = [
       "Terms and Conditions",
-      "About Us",
       "Contact Us",
       "Facebook Page Link",
       "Instagram Link",
@@ -27,19 +38,16 @@ class DropMenu extends StatelessWidget {
 
     return AnimatedSwitcher(
       duration: const Duration(milliseconds: 250),
-      switchInCurve: Curves.easeOut,
-      switchOutCurve: Curves.easeIn,
       child: isVisible
           ? Material(
               key: const ValueKey("dropdown"),
               color: Colors.transparent,
               child: Container(
-                margin:
-                    const EdgeInsets.symmetric(horizontal: 16, vertical: 0),
+                margin: const EdgeInsets.symmetric(horizontal: 16),
                 padding: const EdgeInsets.symmetric(vertical: 10),
                 decoration: BoxDecoration(
-                  color: Colors.white.withOpacity(0.8),
-                  borderRadius: BorderRadius.circular(10),
+                  color: Colors.white.withOpacity(0.9),
+                  borderRadius: BorderRadius.circular(12),
                   boxShadow: [
                     BoxShadow(
                       color: Colors.black.withOpacity(0.08),
@@ -52,7 +60,7 @@ class DropMenu extends StatelessWidget {
                   mainAxisSize: MainAxisSize.min,
                   children: items.map((label) {
                     return GestureDetector(
-                      onTap: () => onItemTap(label),
+                      onTap: () => _handleTap(context, label),
                       child: Container(
                         width: double.infinity,
                         padding: const EdgeInsets.symmetric(
@@ -66,13 +74,6 @@ class DropMenu extends StatelessWidget {
                         decoration: BoxDecoration(
                           color: const Color.fromRGBO(241, 217, 251, 1),
                           borderRadius: BorderRadius.circular(12),
-                          boxShadow: [
-                            BoxShadow(
-                              color: Colors.black.withOpacity(0.05),
-                              blurRadius: 4,
-                              offset: const Offset(0, 2),
-                            ),
-                          ],
                         ),
                         child: Center(
                           child: Text(
@@ -90,9 +91,47 @@ class DropMenu extends StatelessWidget {
                 ),
               ),
             )
-          : const SizedBox.shrink(
-              key: ValueKey("hidden"),
-            ),
+          : const SizedBox.shrink(),
     );
+  }
+
+  Future<void> _handleTap(BuildContext context, String label) async {
+    switch (label) {
+      case "Contact Us":
+        await _launchUri(Uri(
+          scheme: 'mailto',
+          path: adminEmail,
+          query: 'subject=Support Request',
+        ));
+        break;
+
+      case "Facebook Page Link":
+        await _launchUri(Uri.parse(facebookPageUrl));
+        break;
+
+      case "Instagram Link":
+        await _launchUri(Uri.parse(instagramPageUrl));
+        break;
+
+      case "Share our App":
+        await Share.share(appShareText);
+        break;
+
+      case "Shop Address":
+        await _launchUri(Uri.parse(shopAddressMapUrl));
+        break;
+
+      default:
+        onItemTap(label);
+    }
+  }
+
+  Future<void> _launchUri(Uri uri) async {
+    if (!await launchUrl(
+      uri,
+      mode: LaunchMode.externalApplication,
+    )) {
+      debugPrint("Could not launch $uri");
+    }
   }
 }

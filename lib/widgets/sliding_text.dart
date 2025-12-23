@@ -4,11 +4,7 @@ class SlidingText extends StatefulWidget {
   final String text;
   final double speed;
 
-  const SlidingText({
-    super.key,
-    required this.text,
-    this.speed = 30,
-  });
+  const SlidingText({super.key, required this.text, this.speed = 50});
 
   @override
   State<SlidingText> createState() => _SlidingTextState();
@@ -17,21 +13,57 @@ class SlidingText extends StatefulWidget {
 class _SlidingTextState extends State<SlidingText>
     with SingleTickerProviderStateMixin {
   late final AnimationController _controller;
-  late final Animation<Offset> _animation;
+  Animation<double>? _animation;
 
   @override
   void initState() {
     super.initState();
 
     _controller = AnimationController(
-      duration: Duration(seconds: widget.speed.toInt()),
       vsync: this,
-    )..repeat();
+      duration: Duration(seconds: widget.speed.toInt()),
+    );
 
-    _animation = Tween<Offset>(
-      begin: const Offset(1, 0),
-      end: const Offset(-1, 0),
+    WidgetsBinding.instance.addPostFrameCallback((_) {
+      if (widget.text.isNotEmpty) {
+        _recalculateAnimation();
+      }
+    });
+  }
+
+  void _recalculateAnimation() {
+    final textPainter = TextPainter(
+      text: TextSpan(
+        text: widget.text,
+        style: const TextStyle(fontSize: 16, fontWeight: FontWeight.bold),
+      ),
+      maxLines: 1,
+      textScaleFactor: MediaQuery.of(context).textScaleFactor,
+      textDirection: TextDirection.ltr,
+    )..layout();
+
+    final textWidth = textPainter.width;
+    final screenWidth = MediaQuery.of(context).size.width;
+
+    _animation = Tween<double>(
+      begin: screenWidth,
+      end: -textWidth - 20,
     ).animate(CurvedAnimation(parent: _controller, curve: Curves.linear));
+
+    _controller
+      ..reset()
+      ..repeat();
+  }
+
+  @override
+  void didUpdateWidget(covariant SlidingText oldWidget) {
+    super.didUpdateWidget(oldWidget);
+
+    if (oldWidget.text != widget.text && widget.text.isNotEmpty) {
+      WidgetsBinding.instance.addPostFrameCallback((_) {
+        _recalculateAnimation();
+      });
+    }
   }
 
   @override
@@ -42,32 +74,50 @@ class _SlidingTextState extends State<SlidingText>
 
   @override
   Widget build(BuildContext context) {
-    final screenWidth = MediaQuery.of(context).size.width;
+    if (_animation == null || widget.text.isEmpty) {
+      return _container(const SizedBox.shrink());
+    }
 
-    return Center(
-      child: Container(
-        width: screenWidth,
-        height: 40,
-        color: Colors.purple.shade50,
-        child: ClipRect(
-          child: SlideTransition(
-            position: _animation,
+    return _container(
+      ClipRect(
+        child: AnimatedBuilder(
+          animation: _animation!,
+          builder: (_, child) {
+            return Transform.translate(
+              offset: Offset(_animation!.value, 0),
+              child: child,
+            );
+          },
+          child: OverflowBox(
+            minWidth: 0,
+            maxWidth: double.infinity,
+            alignment: Alignment.centerLeft,
             child: Align(
-              alignment: Alignment.centerLeft,
+              alignment: Alignment.center,
               child: Text(
                 widget.text,
+                maxLines: 1,
+                softWrap: false,
+                overflow: TextOverflow.visible,
                 style: const TextStyle(
                   fontSize: 16,
                   fontWeight: FontWeight.bold,
                   color: Colors.purple,
                 ),
-                maxLines: 1,
-                overflow: TextOverflow.visible,
               ),
             ),
           ),
         ),
       ),
+    );
+  }
+
+  Widget _container(Widget child) {
+    return Container(
+      height: 40,
+      width: double.infinity,
+      color: Colors.purple.shade50,
+      child: child,
     );
   }
 }

@@ -19,6 +19,9 @@ Widget inputBox(
     child: TextField(
       controller: controller,
       obscureText: obscure,
+      minLines: 1,
+      maxLines: null,
+      keyboardType: TextInputType.multiline,
       decoration: InputDecoration(
         border: InputBorder.none,
         hintText: hint,

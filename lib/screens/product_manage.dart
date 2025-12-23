@@ -1,12 +1,17 @@
 import 'dart:convert';
 import 'dart:io';
 import 'package:cloud_firestore/cloud_firestore.dart';
+import 'package:firebase_auth/firebase_auth.dart';
 import 'package:flutter/material.dart';
 import 'package:image_picker/image_picker.dart';
 import 'package:permission_handler/permission_handler.dart';
+import 'package:shop_cutesy/screens/management.dart';
 import 'package:shop_cutesy/utils/purple_box.dart';
+import 'package:shop_cutesy/widgets/menu_drop.dart';
 import 'package:shop_cutesy/widgets/top_bar.dart';
 import 'package:shop_cutesy/widgets/bottom_navigation.dart';
+import 'package:flutter/gestures.dart';
+import 'package:url_launcher/url_launcher.dart';
 
 class ProductManage extends StatefulWidget {
   const ProductManage({super.key});
@@ -21,6 +26,9 @@ enum ArchiveSub { products, discounts }
 
 class _ProductManageState extends State<ProductManage> {
   bool menuVisible = false;
+  String? userRole;
+  bool roleLoaded = false;
+
   int bottomIndex = -1;
 
   List<DocumentSnapshot> productList = [];
@@ -41,8 +49,22 @@ class _ProductManageState extends State<ProductManage> {
   @override
   void initState() {
     super.initState();
-    searchC.addListener(_searchCurrent);
+    loadUserRole();
     fetchAll();
+  }
+
+  void loadUserRole() async {
+    final currentUser = FirebaseAuth.instance.currentUser;
+    if (currentUser == null) return;
+
+    final doc = await FirebaseFirestore.instance
+        .collection('users')
+        .doc(currentUser.uid)
+        .get();
+
+    userRole = doc['role'];
+    roleLoaded = true;
+    setState(() {});
   }
 
   @override
@@ -139,11 +161,13 @@ class _ProductManageState extends State<ProductManage> {
       text: data["title"] ?? "",
     );
     TextEditingController priceC = TextEditingController(
-      text: data["price"] ?? "",
+      text: data["price"]?.toString() ?? "",
     );
+
     TextEditingController qtyC = TextEditingController(
-      text: data["quantity"] ?? "",
+      text: data["quantity"]?.toString() ?? "",
     );
+
     TextEditingController descC = TextEditingController(
       text: data["description"] ?? "",
     );
@@ -290,14 +314,14 @@ class _ProductManageState extends State<ProductManage> {
                     children: [
                       SizedBox(
                         height: 120,
-                        child: Row(
-                          children: [
-                            Expanded(
-                              child: Row(
-                                mainAxisAlignment: MainAxisAlignment.start,
+                        child: SingleChildScrollView(
+                          scrollDirection: Axis.horizontal,
+                          child: Row(
+                            children: [
+                              Row(
                                 children: List.generate(3, (index) {
                                   return Container(
-                                    margin: const EdgeInsets.only(right: 10),
+                                    margin: const EdgeInsets.only(right: 6),
                                     width: 60,
                                     height: 60,
                                     decoration: BoxDecoration(
@@ -350,25 +374,61 @@ class _ProductManageState extends State<ProductManage> {
                                   );
                                 }),
                               ),
-                            ),
-                            GestureDetector(
-                              onTap: pickImage,
-                              child: Container(
-                                width: 60,
-                                height: 60,
-                                decoration: BoxDecoration(
-                                  color: fieldPurple,
-                                  borderRadius: BorderRadius.circular(12),
-                                ),
-                                child: const Icon(
-                                  Icons.add,
-                                  color: Colors.white,
+                              GestureDetector(
+                                onTap: pickImage,
+                                child: Container(
+                                  width: 60,
+                                  height: 60,
+                                  margin: const EdgeInsets.only(left: 6),
+                                  decoration: BoxDecoration(
+                                    color: fieldPurple,
+                                    borderRadius: BorderRadius.circular(12),
+                                  ),
+                                  child: const Icon(
+                                    Icons.add,
+                                    color: Colors.white,
+                                  ),
                                 ),
                               ),
+                            ],
+                          ),
+                        ),
+                      ),
+
+                      RichText(
+                        text: TextSpan(
+                          text: "Images must be less than 200KB each. ",
+                          style: const TextStyle(
+                            color: Colors.black,
+                            fontSize: 12,
+                          ),
+                          children: [
+                            TextSpan(
+                              text: "Resize",
+                              style: const TextStyle(
+                                color: Colors.purple,
+                                fontSize: 12,
+                                decoration: TextDecoration.underline,
+                              ),
+                              recognizer: TapGestureRecognizer()
+                                ..onTap = () async {
+                                  final url = Uri.parse(
+                                    "https://www.simpleimageresizer.com/resize-image-to-200-kb",
+                                  );
+                                  if (await canLaunchUrl(url)) {
+                                    await launchUrl(
+                                      url,
+                                      mode: LaunchMode.externalApplication,
+                                    );
+                                  } else {
+                                    print("Could not launch $url");
+                                  }
+                                },
                             ),
                           ],
                         ),
                       ),
+
                       const SizedBox(height: 12),
                       inputBox(titleC, "Product Title"),
                       const SizedBox(height: 8),
@@ -385,7 +445,7 @@ class _ProductManageState extends State<ProductManage> {
                           controller: descC,
                           maxLines: 4,
                           decoration: const InputDecoration(
-                            hintText: "Description (max 200 words)",
+                            hintText: "Description (max 400 words)",
                             hintStyle: TextStyle(color: Colors.white),
                             border: InputBorder.none,
                             contentPadding: EdgeInsets.all(12),
@@ -1098,66 +1158,101 @@ class _ProductManageState extends State<ProductManage> {
     return Scaffold(
       backgroundColor: bgPink,
       body: SafeArea(
-        child: Column(
+        child: Stack(
           children: [
-            TopBar(onMenuTap: () {}),
-            const SizedBox(height: 10),
-            const Text(
-              "Products Details",
-              style: TextStyle(fontWeight: FontWeight.bold, fontSize: 24),
-            ),
-            const SizedBox(height: 10),
-            Padding(
-              padding: const EdgeInsets.symmetric(horizontal: 14),
-              child: inputBox(
-                searchC,
-                viewMode == ViewMode.products
-                    ? "Search Products"
-                    : viewMode == ViewMode.discounts
-                    ? "Search Discounts"
-                    : "Search Archives",
-              ),
-            ),
-            const SizedBox(height: 15),
-
-            Row(
-              mainAxisAlignment: MainAxisAlignment.spaceEvenly,
+            Column(
               children: [
-                _actionBtn("Add", () => _onAddTapped()),
-                _actionBtn("Edit", handleEdit),
-                _actionBtn("Delete", confirmDeleteOrArchive),
+                TopBar(
+                  onMenuTap: () {
+                    if (!roleLoaded) return;
+                    setState(() => menuVisible = !menuVisible);
+                  },
+                ),
+
+                const SizedBox(height: 10),
+                const Text(
+                  "Products Details",
+                  style: TextStyle(fontWeight: FontWeight.bold, fontSize: 24),
+                ),
+                const SizedBox(height: 10),
+
+                Padding(
+                  padding: const EdgeInsets.symmetric(horizontal: 14),
+                  child: inputBox(
+                    searchC,
+                    viewMode == ViewMode.products
+                        ? "Search Products"
+                        : viewMode == ViewMode.discounts
+                        ? "Search Discounts"
+                        : "Search Archives",
+                  ),
+                ),
+
+                const SizedBox(height: 15),
+
+                Row(
+                  mainAxisAlignment: MainAxisAlignment.spaceEvenly,
+                  children: [
+                    _actionBtn("Add", () => _onAddTapped()),
+                    _actionBtn("Edit", handleEdit),
+                    _actionBtn("Delete", confirmDeleteOrArchive),
+                  ],
+                ),
+
+                const SizedBox(height: 12),
+
+                Row(
+                  mainAxisAlignment: MainAxisAlignment.center,
+                  children: [
+                    _modeBtn("Products", ViewMode.products),
+                    const SizedBox(width: 8),
+                    _modeBtn("Discounts", ViewMode.discounts),
+                    const SizedBox(width: 8),
+                    _modeBtn("Archives", ViewMode.archives),
+                  ],
+                ),
+
+                const SizedBox(height: 12),
+
+                if (viewMode == ViewMode.archives)
+                  Row(
+                    mainAxisAlignment: MainAxisAlignment.center,
+                    children: [
+                      _archiveBtn("Products", ArchiveSub.products),
+                      const SizedBox(width: 8),
+                      _archiveBtn("Discounts", ArchiveSub.discounts),
+                      const SizedBox(width: 8),
+                      _actionBtn("Retrieve", retrieveFromArchive),
+                    ],
+                  ),
+
+                const SizedBox(height: 16),
+
+                Expanded(child: _buildTableArea()),
               ],
             ),
-            const SizedBox(height: 12),
+            if (menuVisible)
+              Positioned(
+                top: 70,
+                right: 10,
+                left: 10,
+                child: DropMenu(
+                  isVisible: menuVisible,
+                  userRole: userRole ?? "user",
+                  onItemTap: (value) {
+                    setState(() => menuVisible = false);
 
-            Row(
-              mainAxisAlignment: MainAxisAlignment.center,
-              children: [
-                _modeBtn("Products", ViewMode.products),
-                const SizedBox(width: 8),
-                _modeBtn("Discounts", ViewMode.discounts),
-                const SizedBox(width: 8),
-                _modeBtn("Archives", ViewMode.archives),
-              ],
-            ),
-
-            const SizedBox(height: 12),
-
-            if (viewMode == ViewMode.archives)
-              Row(
-                mainAxisAlignment: MainAxisAlignment.center,
-                children: [
-                  _archiveBtn("Products", ArchiveSub.products),
-                  const SizedBox(width: 8),
-                  _archiveBtn("Discounts", ArchiveSub.discounts),
-                  const SizedBox(width: 8),
-                  _actionBtn("Retrieve", retrieveFromArchive),
-                ],
+                    if (value == "Management") {
+                      Navigator.push(
+                        context,
+                        MaterialPageRoute(
+                          builder: (_) => const ManagementPage(),
+                        ),
+                      );
+                    }
+                  },
+                ),
               ),
-
-            const SizedBox(height: 16),
-
-            Expanded(child: _buildTableArea()),
           ],
         ),
       ),
@@ -1179,59 +1274,66 @@ class _ProductManageState extends State<ProductManage> {
       if (filteredList.isEmpty)
         return const Center(child: Text("No products found."));
       return SingleChildScrollView(
-        scrollDirection: Axis.horizontal,
-        child: DataTable(
-          columns: const [
-            DataColumn(label: Text("Images")),
-            DataColumn(label: Text("Title")),
-            DataColumn(label: Text("Price")),
-            DataColumn(label: Text("Qty")),
-            DataColumn(label: Text("Category")),
-            DataColumn(label: Text("Tag")),
-            DataColumn(label: Text("Discount (%)")),
-          ],
-          rows: filteredList.map((doc) {
-            String id = doc.id;
-            Map data = doc.data() as Map;
-            List images = data["images"] ?? [];
-            return DataRow(
-              selected: selectedItems.contains(id),
-              onSelectChanged: (val) {
-                setState(() {
-                  val == true
-                      ? selectedItems.add(id)
-                      : selectedItems.remove(id);
-                });
-              },
-              cells: [
-                DataCell(
-                  SizedBox(
-                    width: 160,
-                    child: ListView(
-                      scrollDirection: Axis.horizontal,
-                      children: images.map<Widget>((img) {
-                        return Container(
-                          margin: const EdgeInsets.only(right: 6),
-                          width: 50,
-                          height: 50,
-                          child: Image.memory(
-                            base64Decode(img),
-                            fit: BoxFit.cover,
-                          ),
-                        );
-                      }).toList(),
+        child: SingleChildScrollView(
+          scrollDirection: Axis.horizontal,
+          child: DataTable(
+            columns: const [
+              DataColumn(label: Text("Images")),
+              DataColumn(label: Text("Title")),
+              DataColumn(label: Text("Price")),
+              DataColumn(label: Text("Qty")),
+              DataColumn(label: Text("Total Sold")),
+              DataColumn(label: Text("Category")),
+              DataColumn(label: Text("Tag")),
+              DataColumn(label: Text("Discount (%)")),
+            ],
+            rows: filteredList.map((doc) {
+              String id = doc.id;
+              Map data = doc.data() as Map;
+              List images = data["images"] ?? [];
+              final int totalSold = (data["total_sold"] as num?)?.toInt() ?? 0;
+              return DataRow(
+                selected: selectedItems.contains(id),
+                onSelectChanged: (val) {
+                  setState(() {
+                    val == true
+                        ? selectedItems.add(id)
+                        : selectedItems.remove(id);
+                  });
+                },
+                cells: [
+                  DataCell(
+                    SizedBox(
+                      width: 160,
+                      child: ListView(
+                        scrollDirection: Axis.horizontal,
+                        children: images.map<Widget>((img) {
+                          return Container(
+                            margin: const EdgeInsets.only(right: 6),
+                            width: 50,
+                            height: 50,
+                            child: Image.memory(
+                              base64Decode(img),
+                              fit: BoxFit.cover,
+                            ),
+                          );
+                        }).toList(),
+                      ),
                     ),
                   ),
-                ),
-                DataCell(Text(data["title"] ?? "")),
-                DataCell(Text(data["price"] ?? "")),
-                DataCell(Text(data["quantity"] ?? "")),
-                DataCell(Text((data["categories"] as List?)?.join(", ") ?? "")),
-                DataCell(Text((data["tag"] ?? "").toString())),
-                DataCell(Text((data["discount"] ?? 0).toString())),
-              ],
-            );
-          }).toList(),
+                  DataCell(Text(data["title"] ?? "")),
+                  DataCell(Text((data["price"] ?? "").toString())),
+                  DataCell(Text((data["quantity"] ?? "").toString())),
+                  DataCell(Text(totalSold.toString())),
+                  DataCell(
+                    Text((data["categories"] as List?)?.join(", ") ?? ""),
+                  ),
+                  DataCell(Text((data["tag"] ?? "").toString())),
+                  DataCell(Text((data["discount"] ?? 0).toString())),
+                ],
+              );
+            }).toList(),
+          ),
         ),
       );
     } else if (viewMode == ViewMode.discounts) {

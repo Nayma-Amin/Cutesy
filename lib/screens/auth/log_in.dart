@@ -1,3 +1,5 @@
+import 'package:cloud_firestore/cloud_firestore.dart';
+import 'package:firebase_auth/firebase_auth.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
 import 'package:shop_cutesy/screens/home_page.dart';
@@ -19,32 +21,91 @@ class _LoginPageState extends State<LoginPage> {
   bool _obscurePassword = true;
 
   void handleLogin() async {
-    setState(() => _loading = true);
+  setState(() => _loading = true);
 
-    final email = _email.text.trim();
-    final password = _password.text.trim();
+  final email = _email.text.trim();
+  final password = _password.text.trim();
 
-    final result = await AuthService().loginUser(
-      email: email,
-      password: password,
-    );
+  try {
+    final result = await AuthService().loginUser(email: email, password: password);
 
-    setState(() => _loading = false);
-
-    if (result == null) {
-      TextInput.finishAutofillContext(shouldSave: remember);
-
-      if (!mounted) return;
-      Navigator.pushReplacement(
-        context,
-        MaterialPageRoute(builder: (_) => const HomePage()),
-      );
-    } else {
-      ScaffoldMessenger.of(
-        context,
-      ).showSnackBar(SnackBar(content: Text(result)));
+    if (result != null) {
+      setState(() => _loading = false);
+      ScaffoldMessenger.of(context)
+          .showSnackBar(SnackBar(content: Text(result)));
+      return;
     }
+
+    final firebaseUser = FirebaseAuth.instance.currentUser;
+    if (firebaseUser == null) throw "Unable to get user info.";
+
+    final uid = firebaseUser.uid;
+    final firestore = FirebaseFirestore.instance;
+
+    final bannedDoc = await firestore.collection("banned_users").doc(uid).get();
+    if (bannedDoc.exists) {
+      final reason = bannedDoc.data()?["reason"] ?? "No reason provided";
+      _showBlockedDialog("banned", reason);
+      setState(() => _loading = false);
+      await FirebaseAuth.instance.signOut();
+      return;
+    }
+
+    final restrictedDoc = await firestore.collection("restricted_users").doc(uid).get();
+    if (restrictedDoc.exists) {
+      final reason = restrictedDoc.data()?["reason"] ?? "No reason provided";
+      _showBlockedDialog("restricted", reason);
+      setState(() => _loading = false);
+      await FirebaseAuth.instance.signOut();
+      return;
+    }
+
+    final userDoc = await firestore.collection("users").doc(uid).get();
+    if (!userDoc.exists) {
+      _showBlockedDialog("unknown", "You do not have access to the app.");
+      setState(() => _loading = false);
+      await FirebaseAuth.instance.signOut();
+      return;
+    }
+
+    TextInput.finishAutofillContext(shouldSave: remember);
+
+    if (!mounted) return;
+    Navigator.pushReplacement(
+      context,
+      MaterialPageRoute(builder: (_) => const HomePage()),
+    );
+  } catch (e) {
+    setState(() => _loading = false);
+    ScaffoldMessenger.of(context)
+        .showSnackBar(SnackBar(content: Text(e.toString())));
   }
+}
+
+void _showBlockedDialog(String type, String reason) {
+  showDialog(
+    context: context,
+    builder: (_) => AlertDialog(
+      title: Text(type == "banned"
+          ? "You are banned"
+          : type == "restricted"
+              ? "You are restricted"
+              : "Access denied"),
+      content: Text(type == "banned"
+          ? "You are banned from our app because: $reason"
+          : type == "restricted"
+              ? "You are restricted from our app because: $reason"
+              : reason),
+      actions: [
+        TextButton(
+          onPressed: () => Navigator.pop(context),
+          child: const Text("OK"),
+        ),
+      ],
+    ),
+  );
+}
+
 
   @override
   Widget build(BuildContext context) {

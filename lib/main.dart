@@ -5,7 +5,7 @@ import 'package:shop_cutesy/screens/auth/reset_password.dart';
 import 'package:shop_cutesy/screens/auth/sign_up.dart';
 import 'package:shop_cutesy/screens/cart_page.dart';
 import 'package:shop_cutesy/screens/home_page.dart';
-import 'package:shop_cutesy/screens/offer_page.dart';
+import 'package:shop_cutesy/screens/coupon_page.dart';
 import 'package:shop_cutesy/screens/profile_page.dart';
 import 'package:shop_cutesy/screens/splash_screen.dart';
 
@@ -23,6 +23,7 @@ class MyApp extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     return MaterialApp(
+      debugShowCheckedModeBanner: false, 
       navigatorObservers: [routeObserver],
       title: 'Shop Cutesy',
       theme: ThemeData(
@@ -49,7 +50,7 @@ class MyApp extends StatelessWidget {
         '/cart': (context) => const CartPage(),
         '/profile': (context) => const ProfilePage(),
         '/reset': (context) => const ResetPage(),
-        '/offer': (context) => const OfferPage(),
+        '/offer': (context) => const CouponPage(),
       },
     );
   }
