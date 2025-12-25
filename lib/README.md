@@ -1,4 +1,4 @@
-# Nunchi - Video Sharing Website
+# Cutesy - Shopping App
 
 Cutesy is a flutter and dart mobile application. A shopping app, designed with simplicity, implemented with unique and dynamic solutions. From the flash screen till the backend it is implemented to enhence user engagement and hold user interest.
 
