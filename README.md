@@ -6,6 +6,8 @@ Cutesy is a flutter and dart mobile application. A shopping app, designed with s
 
 ## App Demonstration
 
+The file is 47MB. So, it might not show on github. I cordially request you to download and see my work in the demonstration.
+
 [Watch App Demo](assets/demo/cutesy_demo.mp4)
 
 ---
