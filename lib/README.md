@@ -4,6 +4,12 @@ Cutesy is a flutter and dart mobile application. A shopping app, designed with s
 
 ---
 
+## App Demonstration
+
+[Watch App Demo](assets/demo/cutesy_demo.mp4)
+
+---
+
 ## Features
 
 - User sign up and login
